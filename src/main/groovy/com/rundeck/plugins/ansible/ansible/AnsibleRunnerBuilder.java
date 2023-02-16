@@ -799,20 +799,34 @@ public class AnsibleRunnerBuilder {
     }
 
     public String getBaseDir() {
-        String baseDir = null;
-        if ( getjobConf().containsKey(AnsibleDescribable.ANSIBLE_BASE_DIR_PATH) ) {
-        	baseDir = (String) jobConf.get(AnsibleDescribable.ANSIBLE_BASE_DIR_PATH);
+        String baseDirStr = null;
+        baseDir = PropertyResolver.resolveProperty(
+                AnsibleDescribable.ANSIBLE_BASE_DIR_PATH,
+                null,
+                getFrameworkProject(),
+                getFramework(),
+                getNode(),
+                getjobConf()
+        );
+        if (null != baseDir) {
+            baseDirStr = (String) baseDir;
+            if (baseDirStr.contains("${")) {
+                return DataContextUtils.replaceDataReferences(baseDirStr, getContext().getDataContext());
+            }
         }
-
-        if (null != baseDir && baseDir.contains("${")) {
-            return DataContextUtils.replaceDataReferences(baseDir, getContext().getDataContext());
-        }
-        return baseDir;
+        return binariesFilePathStr;
     }
 
     public String getBinariesFilePath() {
         String binariesFilePathStr = null;
-        Object binariesFilePath = getjobConf().get(AnsibleDescribable.ANSIBLE_BINARIES_DIR_PATH);
+        binariesFilePath = PropertyResolver.resolveProperty(
+                AnsibleDescribable.ANSIBLE_BINARIES_DIR_PATH,
+                null,
+                getFrameworkProject(),
+                getFramework(),
+                getNode(),
+                getjobConf()
+        );
         if (null != binariesFilePath) {
             binariesFilePathStr = (String) binariesFilePath;
             if (binariesFilePathStr.contains("${")) {
